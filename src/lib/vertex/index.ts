@@ -5,12 +5,15 @@ const defaultTextModel = "gemini-3-pro-preview";
 const defaultImageModel = "gemini-3-pro-image-preview";
 const location = "global";
 
-const projectId = process.env.GCLOUD_PROJECT_ID || process.env.FIREBASE_PROJECT_ID;
-
-if (!projectId) {
-  throw new Error(
-    "GCLOUD_PROJECT_ID ou FIREBASE_PROJECT_ID não definido. Configure o ambiente antes de usar Vertex AI."
-  );
+// Helper to ensure projectId exists
+function getProjectId() {
+  const projectId = process.env.GCLOUD_PROJECT_ID || process.env.FIREBASE_PROJECT_ID;
+  if (!projectId) {
+    throw new Error(
+      "GCLOUD_PROJECT_ID ou FIREBASE_PROJECT_ID não definido. Configure o ambiente antes de usar Vertex AI."
+    );
+  }
+  return projectId;
 }
 
 // Create GoogleAuth instance with service account credentials
@@ -33,6 +36,7 @@ function getAuth() {
 
 // Vertex AI REST API endpoint - for global location, no region prefix in hostname
 function getEndpoint(modelId: string) {
+  const projectId = getProjectId();
   // Global endpoint uses aiplatform.googleapis.com directly (not global-aiplatform)
   const baseUrl = location === "global"
     ? "https://aiplatform.googleapis.com"

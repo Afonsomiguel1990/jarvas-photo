@@ -3,35 +3,43 @@ import { getAuth as getAdminAuthCore } from "firebase-admin/auth";
 import { getFirestore as getAdminDbCore } from "firebase-admin/firestore";
 import { getStorage as getAdminStorageCore } from "firebase-admin/storage";
 
-const projectId = process.env.FIREBASE_PROJECT_ID;
-const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n");
+let app: any;
 
-if (!projectId || !clientEmail || !privateKey) {
-  console.warn("Firebase Admin envs em falta. Verifica .env.");
+function getFirebaseApp() {
+  if (app) return app;
+
+  const projectId = process.env.FIREBASE_PROJECT_ID;
+  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+  const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n");
+
+  if (!projectId || !clientEmail || !privateKey) {
+    throw new Error("Firebase Admin envs em falta. Verifica .env.");
+  }
+
+  if (getApps().length > 0) {
+    app = getApps()[0];
+  } else {
+    app = initializeApp({
+      credential: cert({
+        projectId,
+        clientEmail,
+        privateKey,
+      }),
+      storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    });
+  }
+  return app;
 }
 
-const app =
-  getApps().length > 0
-    ? getApps()[0]
-    : initializeApp({
-        credential: cert({
-          projectId,
-          clientEmail,
-          privateKey,
-        }),
-        storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-      });
-
 export function getAdminAuth() {
-  return getAdminAuthCore(app);
+  return getAdminAuthCore(getFirebaseApp());
 }
 
 export function getAdminDb() {
-  return getAdminDbCore(app);
+  return getAdminDbCore(getFirebaseApp());
 }
 
 export function getAdminStorage() {
-  return getAdminStorageCore(app);
+  return getAdminStorageCore(getFirebaseApp());
 }
 
