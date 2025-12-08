@@ -5,6 +5,8 @@ import { onAuthStateChanged, getIdToken } from "firebase/auth";
 import { auth, db } from "@/lib/firebase/client";
 import { collection, addDoc, onSnapshot } from "firebase/firestore";
 
+export const dynamic = "force-dynamic";
+
 const packs = [
   { id: "pack-25", label: "25 créditos", price: "9.99 €", credits: 25, priceId: "price_1SaPjQLsjurCRyLCecx10KUq" },
   { id: "pack-60", label: "60 créditos", price: "19.99 €", credits: 60, priceId: "price_1Sc4fYLsjurCRyLCy1dgKjKs" },
