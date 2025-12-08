@@ -31,10 +31,12 @@ environmentVariables:
   - name: VERTEX_AI_MODEL_IMAGE
     value: "gemini-3-pro-image-preview"
 
-# IMPORTANT:
-# Add these SECRET variables in the Firebase Console (Settings > Environment Variables or Secrets):
-# - FIREBASE_CLIENT_EMAIL
-# - FIREBASE_PRIVATE_KEY
-# - STRIPE_SECRET_KEY
-# - STRIPE_WEBHOOK_SECRET
-# - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY (if you want to keep it hidden, otherwise add here)
+  # Secrets (Managed in Google Cloud Secret Manager)
+  - variable: FIREBASE_CLIENT_EMAIL
+    secret: firebase_client_email
+  - variable: FIREBASE_PRIVATE_KEY
+    secret: firebase_private_key
+  - variable: STRIPE_SECRET_KEY
+    secret: stripe_secret_key
+  - variable: STRIPE_WEBHOOK_SECRET
+    secret: stripe_webhook_secret
