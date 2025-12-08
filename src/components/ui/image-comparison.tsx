@@ -1,18 +1,22 @@
+"use client";
+
 import { useState } from "react";
 import Image from "next/image";
 import { GripVertical } from "lucide-react";
 import { Badge } from "@/components/ui/simple-badge";
+import { cn } from "@/lib/utils";
 
 type ImageComparisonProps = {
   before: { src: string; alt?: string; label?: string };
   after: { src: string; alt?: string; label?: string };
+  className?: string;
 };
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
 }
 
-export function ImageComparison({ before, after }: ImageComparisonProps) {
+export function ImageComparison({ before, after, className }: ImageComparisonProps) {
   const [inset, setInset] = useState<number>(50);
   const [dragging, setDragging] = useState<boolean>(false);
 
@@ -30,7 +34,7 @@ export function ImageComparison({ before, after }: ImageComparisonProps) {
   };
 
   return (
-    <div className="relative aspect-video w-full overflow-hidden rounded-2xl border border-white/10 bg-[#0e0d14] select-none">
+    <div className={cn("relative w-full overflow-hidden rounded-2xl border border-white/10 bg-[#0e0d14] select-none", className || "aspect-video")}>
       <div className="absolute left-3 top-3 z-30 flex gap-2">
         {before.label ? <Badge variant="outline">{before.label}</Badge> : null}
         {after.label ? <Badge>{after.label}</Badge> : null}
@@ -68,7 +72,7 @@ export function ImageComparison({ before, after }: ImageComparisonProps) {
           alt={after.alt || "after"}
           fill
           sizes="100vw"
-          className="absolute left-0 top-0 z-10 h-full w-full object-cover"
+          className="absolute left-0 top-0 z-10 h-full w-full object-contain"
           style={{ clipPath: `inset(0 0 0 ${inset}% )` }}
           priority
         />
@@ -77,7 +81,7 @@ export function ImageComparison({ before, after }: ImageComparisonProps) {
           alt={before.alt || "before"}
           fill
           sizes="100vw"
-          className="absolute left-0 top-0 h-full w-full object-cover"
+          className="absolute left-0 top-0 h-full w-full object-contain"
           priority
         />
       </div>

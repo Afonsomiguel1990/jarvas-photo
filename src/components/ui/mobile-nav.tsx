@@ -1,13 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { Home, Camera, CreditCard, Clock, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type NavItem = {
   label: string;
   icon: React.ElementType<{ className?: string }>;
-  onClick?: () => void;
+  href: string;
 };
 
 type MobileNavProps = {
@@ -15,11 +16,10 @@ type MobileNavProps = {
 };
 
 const defaultItems: NavItem[] = [
-  { label: "Home", icon: Home },
-  { label: "Enhance", icon: Camera },
-  { label: "Créditos", icon: CreditCard },
-  { label: "Histórico", icon: Clock },
-  { label: "Perfil", icon: Settings },
+  { label: "Home", icon: Home, href: "/app" },
+  { label: "Enhance", icon: Camera, href: "/app/enhance" },
+  { label: "Créditos", icon: CreditCard, href: "/app/credits" },
+  { label: "Histórico", icon: Clock, href: "/app/history" },
 ];
 
 export function MobileNav({ items }: MobileNavProps) {
@@ -28,7 +28,16 @@ export function MobileNav({ items }: MobileNavProps) {
     return items;
   }, [items]);
 
-  const [activeIndex, setActiveIndex] = useState(0);
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const activeIndex = useMemo(() => {
+    // Procura o match mais específico primeiro, ou o exact match
+    const index = finalItems.findIndex((item) => item.href === pathname);
+    if (index !== -1) return index;
+    // Fallback para home se estivermos em /app mas não num sub-rota específica (exceção feita pois home é /app)
+    return finalItems.findIndex((item) => item.href === "/app");
+  }, [pathname, finalItems]);
 
   return (
     <nav
@@ -46,8 +55,7 @@ export function MobileNav({ items }: MobileNavProps) {
               isActive && "bg-white/10 text-white shadow"
             )}
             onClick={() => {
-              setActiveIndex(index);
-              item.onClick?.();
+              router.push(item.href);
             }}
           >
             <Icon className="h-5 w-5" />
@@ -55,7 +63,7 @@ export function MobileNav({ items }: MobileNavProps) {
           </button>
         );
       })}
-    </nav>
+    </nav >
   );
 }
 

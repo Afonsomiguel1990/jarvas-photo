@@ -1,19 +1,37 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 import { ImageComparison } from "@/components/ui/image-comparison";
 import { GradientBackground } from "@/components/ui/gradient-background";
-import { SectorCard } from "@/components/ui/sector-card";
 import { Badge } from "@/components/ui/simple-badge";
+import { cn } from "@/lib/utils";
 
-const sectors = [
-  { title: "Real Estate", description: "Fotos de imóveis com luz premium." },
-  { title: "Food", description: "Mood Michelin para pratos e sobremesas." },
-  { title: "Fashion", description: "Editorial limpo para looks e peças." },
-  { title: "Product", description: "Catálogo nítido e sem ruído visual." },
-  { title: "Portrait", description: "Retratos naturais e suaves." },
-  { title: "Landscape", description: "Céus e contrastes cinematográficos." },
-];
+const examples = {
+  real_estate: {
+    label: "Imobiliário",
+    before: "/examples/casa-antes.webp",
+    after: "/examples/casa-depois.webp",
+    aspect: "aspect-[3/4]",
+  },
+  food: {
+    label: "Doces",
+    before: "/examples/Bolo1-antes.webp",
+    after: "/examples/Bolo1-depois.webp",
+    aspect: "aspect-[3/4]",
+  },
+  restaurant: {
+    label: "Restauração",
+    before: "/examples/comida1-antes.webp",
+    after: "/examples/comida2-depois.webp",
+    aspect: "aspect-[3/4]",
+  },
+
+};
 
 export default function Home() {
+  const [selected, setSelected] = useState<keyof typeof examples>("real_estate");
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#050507] text-white">
       <div className="absolute inset-0">
@@ -36,12 +54,11 @@ export default function Home() {
       <main className="relative mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-16 px-4 pb-24 pt-16">
         <div className="flex flex-col gap-6 rounded-3xl border border-white/10 bg-white/5 p-8 shadow-2xl backdrop-blur">
           <Badge variant="secondary" className="w-fit">
-            Jarvas · Nano Banana Pro
+            Jarvas AI
           </Badge>
-          <h1 className="text-4xl font-semibold leading-tight md:text-5xl">Melhora as tuas fotos em segundos</h1>
+          <h1 className="text-4xl font-semibold leading-tight md:text-5xl">Melhora qualquer foto, atraí mais clientes.</h1>
           <p className="max-w-2xl text-lg text-neutral-200">
-            Usa o Gemini (gemini-3-pro-image-preview) para elevar fotos de imóveis, comida, moda e mais. Experimenta grátis
-            com watermark ou entra para remover.
+            Experimenta grátis.
           </p>
           <div className="flex flex-wrap items-center gap-3">
             <Link
@@ -54,58 +71,57 @@ export default function Home() {
               href="/auth"
               className="rounded-full border border-white/20 px-5 py-3 text-sm font-semibold text-white/90 transition hover:border-white/50"
             >
-              Entrar com Google
+              Registar ou Login
             </Link>
-            <span className="text-sm text-neutral-300">Sem Apple ID. Apenas Google.</span>
-          </div>
-          <div className="grid gap-3 md:grid-cols-3">
-            {sectors.slice(0, 3).map((sector) => (
-              <SectorCard key={sector.title} title={sector.title} description={sector.description} />
-            ))}
           </div>
         </div>
 
         <section className="grid gap-8 md:grid-cols-[1.3fr_1fr]">
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl backdrop-blur">
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl backdrop-blur flex flex-col gap-4">
+            <div className="flex flex-wrap gap-2">
+              {(Object.keys(examples) as Array<keyof typeof examples>).map((key) => (
+                <button
+                  key={key}
+                  onClick={() => setSelected(key)}
+                  className={cn(
+                    "rounded-full px-4 py-1.5 text-xs font-medium transition-all",
+                    selected === key
+                      ? "bg-white text-black"
+                      : "bg-white/10 text-white hover:bg-white/20"
+                  )}
+                >
+                  {examples[key].label}
+                </button>
+              ))}
+            </div>
+
             <div className="mb-4 flex items-center justify-between text-sm text-neutral-300">
               <span>Antes vs Depois</span>
-              <Badge variant="outline">Watermark no trial</Badge>
             </div>
             <ImageComparison
+              className={examples[selected].aspect}
               before={{
-                src: "https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=1600&q=80",
+                src: examples[selected].before,
                 label: "Original",
               }}
               after={{
-                src: "https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=1600&q=80&sat=-20&exp=1.2",
-                label: "Jarvas",
+                src: examples[selected].after,
+                label: "Jarvas AI",
               }}
             />
           </div>
           <div className="flex flex-col gap-4 rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl backdrop-blur">
-            <h2 className="text-2xl font-semibold">Fluxo super simples</h2>
+            <h2 className="text-2xl font-semibold">Como funciona</h2>
             <ol className="space-y-3 text-neutral-200">
-              <li>1. Sobe a foto ou usa a câmara</li>
-              <li>2. Escolhe o setor para o prompt ideal</li>
-              <li>3. Recebe a versão pro. Trial com watermark</li>
-              <li>4. Faz download sem watermark ao entrar</li>
+              <li>1. Carrega a tua foto</li>
+              <li>2. A IA analisa e melhora automaticamente</li>
+              <li>3. Vê o resultado com marca de água</li>
+              <li>4. Entra para remover a marca de água</li>
             </ol>
             <div className="rounded-2xl border border-white/10 bg-black/30 p-4 text-sm text-neutral-300">
-              <div className="mb-2 text-white">Créditos por compra</div>
-              <p>Compra pacotes quando precisares. Sem mensalidade.</p>
+              <div className="mb-2 text-white">Pagamento flexível</div>
+              <p>Compra créditos quando precisares. Sem mensalidades.</p>
             </div>
-          </div>
-        </section>
-
-        <section className="rounded-3xl border border-white/10 bg-white/5 p-8 shadow-2xl backdrop-blur">
-          <div className="mb-6 flex flex-wrap items-center gap-3">
-            <Badge>Setores</Badge>
-            <span className="text-sm text-neutral-300">Escolhe um e começa</span>
-          </div>
-          <div className="grid gap-4 md:grid-cols-3">
-            {sectors.map((sector) => (
-              <SectorCard key={sector.title} title={sector.title} description={sector.description} />
-            ))}
           </div>
         </section>
       </main>

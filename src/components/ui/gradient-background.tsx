@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useRef } from "react";
 import type { CSSProperties, ReactNode } from "react";
 
@@ -127,15 +129,15 @@ type GradientBackgroundProps = {
   gradientType?: "radial-gradient" | "linear-gradient" | "conic-gradient";
   gradientSize?: string;
   gradientOrigin?:
-    | "bottom-middle"
-    | "bottom-left"
-    | "bottom-right"
-    | "top-middle"
-    | "top-left"
-    | "top-right"
-    | "left-middle"
-    | "right-middle"
-    | "center";
+  | "bottom-middle"
+  | "bottom-left"
+  | "bottom-right"
+  | "top-middle"
+  | "top-left"
+  | "top-right"
+  | "left-middle"
+  | "right-middle"
+  | "center";
   colors?: GradientStop[];
   enableNoise?: boolean;
   noisePatternSize?: number;

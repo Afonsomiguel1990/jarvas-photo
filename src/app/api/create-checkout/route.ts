@@ -5,7 +5,7 @@ import { getAdminAuth } from "@/lib/firebase/admin";
 export const runtime = "nodejs";
 
 const stripeSecret = process.env.STRIPE_SECRET_KEY;
-const stripe = stripeSecret ? new Stripe(stripeSecret, { apiVersion: "2024-11-20" }) : null;
+const stripe = stripeSecret ? new Stripe(stripeSecret, { apiVersion: "2023-10-16" as any }) : null;
 
 export async function POST(req: NextRequest) {
   if (!stripe) {

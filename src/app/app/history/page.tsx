@@ -14,10 +14,21 @@ export default function HistoryPage() {
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (user) => {
       if (!user) return;
-      const token = await getIdToken(user);
-      setIdToken(token);
-      // placeholder: fetch history endpoint if exists
-      setItems([]);
+      try {
+        const token = await getIdToken(user);
+        setIdToken(token);
+
+        const res = await fetch("/api/user/history", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setItems(data.generations || []);
+        }
+      } catch (err) {
+        console.error("Failed to fetch history", err);
+      }
     });
     return () => unsub();
   }, []);
