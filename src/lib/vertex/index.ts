@@ -61,18 +61,34 @@ class VertexModel {
   }
 
   async generateContent(
-    promptOrRequest: string | { contents: Array<{ role: string; parts: Array<{ text?: string; inlineData?: { mimeType: string; data: string } }> }> }
+    promptOrRequest: string | {
+      contents: Array<{ role: string; parts: Array<{ text?: string; inlineData?: { mimeType: string; data: string } }> }>;
+      generationConfig?: {
+        aspectRatio?: string;
+        imageSize?: string;
+      }
+    }
   ) {
     const auth = getAuth();
     const client = await auth.getClient();
     const accessToken = await client.getAccessToken();
 
     let contents: Array<{ role: string; parts: Array<{ text?: string; inlineData?: { mimeType: string; data: string } }> }>;
+    let customConfig = {};
 
     if (typeof promptOrRequest === "string") {
       contents = [{ role: "user", parts: [{ text: promptOrRequest }] }];
     } else {
       contents = promptOrRequest.contents;
+      if (promptOrRequest.generationConfig) {
+        customConfig = {
+          responseModalities: ["TEXT", "IMAGE"],
+          imageConfig: {
+            aspectRatio: promptOrRequest.generationConfig.aspectRatio,
+            imageSize: promptOrRequest.generationConfig.imageSize,
+          }
+        };
+      }
     }
 
     const requestBody = {
@@ -81,6 +97,7 @@ class VertexModel {
         temperature: this.temperature,
         topP: 0.95,
         maxOutputTokens: 32768,
+        ...customConfig,
       },
       safetySettings: [
         { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "OFF" },

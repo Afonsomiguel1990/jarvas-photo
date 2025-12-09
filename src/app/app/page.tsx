@@ -119,15 +119,29 @@ function HistoryGallery() {
             <div className="text-sm font-medium text-white capitalize">{item.sector}</div>
             <div className="text-xs text-neutral-400">{new Date(item.createdAt).toLocaleDateString()}</div>
           </div>
-          <a
-            href={item.imageUrl}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            onClick={async () => {
+              try {
+                const res = await fetch(item.imageUrl);
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `jarvas-${item.id}.png`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+              } catch (e) {
+                console.error("Download failure", e);
+                window.open(item.imageUrl, '_blank');
+              }
+            }}
             className="absolute right-3 top-3 rounded-full bg-white/20 p-2 text-white backdrop-blur opacity-0 transition hover:bg-white/40 group-hover:opacity-100"
-            title="Abrir original"
+            title="Download"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
-          </a>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
+          </button>
         </div>
       ))}
     </div>

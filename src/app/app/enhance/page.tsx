@@ -27,6 +27,7 @@ function EnhanceContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const sector = searchParams.get("sector") || "real_estate";
+  const [aspectRatio, setAspectRatio] = useState("3:4");
   const [base64, setBase64] = useState<string | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [result, setResult] = useState<EnhanceResponse | null>(null);
@@ -56,8 +57,6 @@ function EnhanceContent() {
     return () => unsub();
   }, []);
 
-  const sectorLabel = useMemo(() => sectorCopy[sector] || sector, [sector]);
-
   const handleFiles = async (files: File[]) => {
     const file = files[0];
     if (!file) return;
@@ -86,7 +85,7 @@ function EnhanceContent() {
           "Content-Type": "application/json",
           ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
         },
-        body: JSON.stringify({ image: base64, sector }),
+        body: JSON.stringify({ image: base64, sector, aspectRatio }),
       });
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}));
@@ -103,14 +102,17 @@ function EnhanceContent() {
   };
 
   const sectors = [
-    { id: "real_estate", label: "Imobiliário", image: "/examples/casa-antes.webp" },
-    { id: "food", label: "Doces", image: "/examples/Bolo1-antes.webp" },
-    { id: "restaurant", label: "Restauração", image: "/examples/comida1-antes.webp" },
+    { id: "real_estate", label: "Imobiliário", image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=300&auto=format&fit=crop" },
+    { id: "food", label: "Doces", image: "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=300&q=80" },
+    { id: "restaurant", label: "Restauração", image: "https://images.unsplash.com/photo-1482049016688-2d3e1b311543?q=80&w=300&auto=format&fit=crop" },
     { id: "fashion", label: "Moda", image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=300&q=80" },
     { id: "product", label: "Produto", image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&q=80" },
     { id: "portrait", label: "Retrato", image: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=300&q=80" },
-    { id: "landscape", label: "Paisagem", image: "/examples/casa-antes.webp" },
+    { id: "studio_selfie", label: "Studio Selfie", image: "/examples/G6x00O_XIAASY0r.jpeg" },
+    { id: "landscape", label: "Paisagem", image: "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=300&q=80" },
   ];
+
+  const ratios = ["1:1", "3:4", "4:3", "9:16", "16:9"];
 
   return (
     <div className="relative min-h-screen bg-[#06050b] px-4 py-6 text-white">
@@ -124,6 +126,7 @@ function EnhanceContent() {
           </div>
 
           <div className="flex w-full gap-3 overflow-x-auto pb-2 scrollbar-hide">
+            {/* Sectors ... */}
             {sectors.map((s) => (
               <button
                 key={s.id}
@@ -137,10 +140,26 @@ function EnhanceContent() {
               </button>
             ))}
           </div>
-        </div>
+
+          {/* Aspect Ratio Selector */}
+          <div className="flex gap-2">
+            {ratios.map((r) => (
+              <button
+                key={r}
+                onClick={() => setAspectRatio(r)}
+                className={`rounded-full border px-3 py-1 text-xs transition ${aspectRatio === r
+                  ? "border-primary bg-primary text-white"
+                  : "border-white/10 bg-white/5 text-neutral-400 hover:bg-white/10"
+                  }`}
+              >
+                {r}
+              </button>
+            ))}
+          </div>
+        </div >
 
         <div className="rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-neutral-300">
-          Carrega a imagem para o setor <b>{sectorCopy[sector] || sectors.find(s => s.id === sector)?.label || sector}</b>.
+          Carrega a imagem para o setor <b>{sectorCopy[sector] || sectors.find(s => s.id === sector)?.label || sector}</b> com formato <b>{aspectRatio}</b>.
         </div>
         {/* Main Content Area */}
         <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur">
@@ -163,8 +182,16 @@ function EnhanceContent() {
                   {result.isTrial ? "Com watermark." : "Sem watermark."}
                 </p>
                 <div className="flex gap-2">
-                  <button onClick={() => { setPreview(null); setResult(null); setBase64(null); }} className="rounded-full px-4 py-2 text-sm hover:bg-white/10">
-                    Nova
+                  <button onClick={() => {
+                    if (!idToken) {
+                      router.push("/login?redirect=/app/enhance");
+                      return;
+                    }
+                    setPreview(null);
+                    setResult(null);
+                    setBase64(null);
+                  }} className="rounded-full px-4 py-2 text-sm hover:bg-white/10">
+                    Melhorar outra
                   </button>
                   {!result.isTrial && (
                     <button

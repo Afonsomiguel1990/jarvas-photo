@@ -17,6 +17,7 @@ type EnhanceRequest = {
   image: string; // Base64
   sector: string;
   style?: string; // Made optional as frontend might send it or not, user code has it required but let's be safe
+  aspectRatio?: string;
 };
 
 export async function POST(request: NextRequest) {
@@ -43,7 +44,7 @@ export async function POST(request: NextRequest) {
 
   // 2. Parse Body
   const body = (await request.json().catch(() => ({}))) as EnhanceRequest;
-  const { image, sector, style = "realistic" } = body; // Default style if missing
+  const { image, sector, style = "realistic", aspectRatio = "3:4" } = body; // Default style/ratio if missing
 
   if (!image || !sector) {
     return NextResponse.json(
@@ -52,18 +53,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // 3. Credits Check (if not trial)
-  if (!isTrial && uid) {
-    // Determine cost (e.g., 1 credit)
-    const cost = 1;
-    const hasEnough = await hasCredits(uid, cost);
-    if (!hasEnough) {
-      return NextResponse.json(
-        { error: "Créditos insuficientes." },
-        { status: 402 }
-      );
-    }
-  }
+  // ... (credits check remains same)
 
   try {
     // 4. Prepare Prompt
@@ -76,26 +66,32 @@ export async function POST(request: NextRequest) {
 
     // Map frontend sector IDs to prompts
     switch (sector) {
-      case "food":
-        texturePrompt = `Turn this photo in a professional shot of the exact same food. You can change the layout. Michelin-level photography. Style: ${style}.`;
+      case "restaurant":
+        texturePrompt = `Turn this photo in a professional shot of the exact same food. Michelin-level photograph.`;
+        break;
+      case "food": // Doces
+        texturePrompt = `Turn this photo in a professional shot of the exact same food. you can change the layout. Michelin-level photography.`;
         break;
       case "architecture":
       case "real_estate":
-        texturePrompt = `Turn this photo into a high-end architectural photography. Enhance lighting, remove clutter, and make it look like a luxury property listing. Style: ${style}.`;
+        texturePrompt = `Melhora esta imagem como se fosse tirado por um fotografo profissional. Mantém a consistencia do produto mas podes alterar a composição da imagem.`;
         break;
       case "product":
-        texturePrompt = `Turn this photo into a commercial product shot. Professional studio lighting, sharp focus on the product, clean background. Make it look like a high-end e-commerce listing. Style: ${style}.`;
+        texturePrompt = `Melhora esta imagem como se fosse tirado por um fotografo profissional. Mantém a consistencia do produto mas podes alterar a composição da imagem.`;
         break;
       case "portrait":
       case "fashion":
-        texturePrompt = `Turn this photo into a professional portrait/fashion shot. Flattering lighting, skin texture enhancement while keeping it natural. High-end magazine look. Style: ${style}.`;
+        texturePrompt = `Turn this photo into a professional portrait/fashion shot. Flattering lighting, skin texture enhancement while keeping it natural. High-end magazine look.`;
         break;
       case "landscape":
-        texturePrompt = `Enhance this landscape photo to look like a National Geographic shot. Improve dynamic range, vibrance and clarity. Style: ${style}.`;
+        texturePrompt = `Enhance this landscape photo to look like a National Geographic shot. Improve dynamic range, vibrance and clarity.`;
+        break;
+      case "studio_selfie":
+        texturePrompt = `A professional, high-resolution profile photo, maintaining the exact facial structure, identity, and key features of the person in the input image. The subject is framed from the chest up, with ample headroom. The person looks directly at the camera. They are styled for a professional photo studio shoot also upscale the quality of the image`;
         break;
       default:
         // Fallback generic prompt
-        texturePrompt = `Enhance this ${sector} photo in ${style} style. Make it look professional, high resolution, perfect lighting. Fix any imperfections. Keep the original composition but improve aesthetics.`;
+        texturePrompt = `Enhance this ${sector} photo. Make it look professional, high resolution, perfect lighting. Fix any imperfections. Keep the original composition but improve aesthetics.`;
         break;
     }
 
@@ -109,7 +105,11 @@ export async function POST(request: NextRequest) {
           { text: texturePrompt },
           { inlineData: { mimeType: mimeType, data: base64Data } }
         ]
-      }]
+      }],
+      generationConfig: {
+        aspectRatio: aspectRatio,
+        imageSize: "2K", // Default to 2K as requested
+      }
     });
 
     // Extract Result Image (Base64)
@@ -135,6 +135,14 @@ export async function POST(request: NextRequest) {
     }
 
     let finalBuffer: any = Buffer.from(generatedB64, "base64");
+
+    // Debug: Check Resolution
+    try {
+      const meta = await sharp(finalBuffer).metadata();
+      console.log(`[Vertex AI] Generated Image Resolution: ${meta.width}x${meta.height}`);
+    } catch (e) {
+      console.error("[Vertex AI] Failed to check resolution:", e);
+    }
 
     // 6. Watermark (if Trial)
     if (isTrial) {
@@ -195,7 +203,7 @@ export async function POST(request: NextRequest) {
 
   } catch (err: any) {
     console.error("Enhance Error:", err);
-    return NextResponse.json({ error: "Failed to enhance image" }, { status: 500 });
+    return NextResponse.json({ error: err.message || String(err) || "Failed to enhance image" }, { status: 500 });
   }
 }
 

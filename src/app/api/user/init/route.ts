@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
         email: decoded.email ?? "",
         displayName: decoded.name ?? "",
         photoURL: decoded.picture ?? "",
-        credits: 1,
+        credits: 2,
         createdAt: new Date().toISOString(),
       });
     }
