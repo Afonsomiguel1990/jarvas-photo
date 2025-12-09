@@ -8,17 +8,17 @@ let app: any;
 function getFirebaseApp() {
   if (app) return app;
 
-  const projectId = process.env.FIREBASE_PROJECT_ID;
+  const projectId = process.env.FIREBASE_PROJECT_ID || process.env.GCLOUD_PROJECT_ID;
   const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
   const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n");
 
-  if (!projectId || !clientEmail || !privateKey) {
-    throw new Error("Firebase Admin envs em falta. Verifica .env.");
-  }
-
   if (getApps().length > 0) {
     app = getApps()[0];
-  } else {
+    return app;
+  }
+
+  // If we have explicit credentials, use them
+  if (projectId && clientEmail && privateKey) {
     app = initializeApp({
       credential: cert({
         projectId,
@@ -27,7 +27,16 @@ function getFirebaseApp() {
       }),
       storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
     });
+  } else {
+    // Otherwise, try ADC (Application Default Credentials)
+    // This works on Cloud Run / App Hosting if the service account has permission
+    console.log("Initializing Firebase Admin with ADC...");
+    app = initializeApp({
+      projectId: projectId || undefined,
+      storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    });
   }
+
   return app;
 }
 

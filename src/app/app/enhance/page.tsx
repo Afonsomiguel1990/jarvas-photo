@@ -200,7 +200,7 @@ function EnhanceContent() {
                     onClick={handleEnhance}
                     className="rounded-full bg-primary px-8 py-2 text-sm font-semibold text-primary-foreground shadow hover:brightness-110"
                   >
-                    Gerar
+                    Melhorar
                   </button>
                 </div>
               )}
