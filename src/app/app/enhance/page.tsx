@@ -115,7 +115,7 @@ function EnhanceContent() {
   const ratios = ["1:1", "3:4", "4:3", "9:16", "16:9"];
 
   return (
-    <div className="relative min-h-screen bg-[#06050b] px-4 py-6 text-white">
+    <div className="relative min-h-screen bg-[#06050b] px-4 pt-6 pb-32 text-white">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
