@@ -17,19 +17,24 @@ function getProjectId() {
 }
 
 // Create GoogleAuth instance with service account credentials
+// Create GoogleAuth instance with service account credentials
 function getAuth() {
   const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
   const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n");
 
-  if (!clientEmail || !privateKey) {
-    throw new Error("Firebase credentials (client_email, private_key) not configured");
+  if (clientEmail && privateKey) {
+    return new GoogleAuth({
+      credentials: {
+        client_email: clientEmail,
+        private_key: privateKey,
+      },
+      scopes: ["https://www.googleapis.com/auth/cloud-platform"],
+    });
   }
 
+  // Fallback to ADC
+  console.log("Using ADC for Vertex AI");
   return new GoogleAuth({
-    credentials: {
-      client_email: clientEmail,
-      private_key: privateKey,
-    },
     scopes: ["https://www.googleapis.com/auth/cloud-platform"],
   });
 }

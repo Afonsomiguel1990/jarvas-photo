@@ -58,7 +58,7 @@ export default function DashboardPage() {
               onClick={() => router.push("/app/enhance")}
               className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow hover:brightness-110"
             >
-              + Nova geração
+              + Nova melhoria
             </button>
           </div>
 
