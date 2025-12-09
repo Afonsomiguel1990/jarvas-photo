@@ -167,13 +167,28 @@ function EnhanceContent() {
                     Nova
                   </button>
                   {!result.isTrial && (
-                    <a
+                    <button
                       className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow hover:brightness-110"
-                      href={result.enhancedUrl}
-                      download
+                      onClick={async () => {
+                        try {
+                          const res = await fetch(result.enhancedUrl);
+                          const blob = await res.blob();
+                          const url = window.URL.createObjectURL(blob);
+                          const a = document.createElement('a');
+                          a.href = url;
+                          a.download = `jarvas-enhanced-${Date.now()}.png`;
+                          document.body.appendChild(a);
+                          a.click();
+                          window.URL.revokeObjectURL(url);
+                          document.body.removeChild(a);
+                        } catch (e) {
+                          console.error("Download failed", e);
+                          window.open(result.enhancedUrl, '_blank');
+                        }
+                      }}
                     >
                       Download
-                    </a>
+                    </button>
                   )}
                 </div>
               </div>
