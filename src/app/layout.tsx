@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Jarvas - Image Enhancer",
-  description: "Melhora fotos com Gemini. Trial gratuito com watermark e créditos.",
+  description: "Melhora as tuas fotos em segundos.",
 };
 
 export default function RootLayout({
